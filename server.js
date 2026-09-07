@@ -3,7 +3,12 @@ const http = require("node:http");
 const PORT = 3000;
 
 const server = http.createServer((req, res) => {
-    if (req.url === '/users' && req.method === "GET") {
+    const parts = req.url.split("/");
+
+    if (
+        req.method === "GET" &&
+        parts[1] === "users"
+    ) {
         const users = [
             {
                 "id": 1,
@@ -14,22 +19,44 @@ const server = http.createServer((req, res) => {
                 "name": "B"
             }
         ]
+        const id = Number(parts[2]);
 
-        res.writeHead(200, {
-            "Content-Type": "application/json"
-        });
+        if (!Number.isInteger(id) || id <= 0) {
+            const user = users.find(user => user.id === id);
+            if (user) {
+                res.writeHead(200, {
+                    "Content-Type": "application/json"
+                });
+                
+                res.end(JSON.stringify({
+                    user: user
+                }))
+            } else {
+                res.writeHead(404, {
+                    "Content-Type": "application/json"
+                });
+                
+                res.end(JSON.stringify({
+                    message: `Not found user ${id}`
+                }))
+            }
+        } else {
+            res.writeHead(200, {
+                "Content-Type": "application/json"
+            });
         
-        res.end(JSON.stringify({
-            users: users
-        }))
-    } else if (req.url === '/about' && req.method === "GET") {
+            res.end(JSON.stringify({
+                users: users
+            }))
+        }
+    } else if (parts[1] === 'about' && req.method === "GET") {
         res.writeHead(200, {
             "Content-Type": "application/json"
         });
         res.end(JSON.stringify(
             { "name": "User Management API", "version": "1.0.0" }
         ))
-    } else if (req.url === "/" && req.method === "GET") {
+    } else if (parts[1] === "" && req.method === "GET") {
         res.writeHead(200, {
             "Content-Type": "application/json"
         })
@@ -38,7 +65,7 @@ const server = http.createServer((req, res) => {
             message: "Welcome"
         }))
     } else {
-        res.writeHead(400, {
+        res.writeHead(404, {
             "Content-Type": "application/json"
         })
 
