@@ -24,14 +24,14 @@ const server = http.createServer((req, res) => {
             const id = Number(parts[2]);
 
             if (Number.isInteger(id) && id >= 0) {
-                const user = users.find(user => user.id === id);
-                if (user) {
+                const existing = users.find(existing => existing.id === id);
+                if (existing) {
                     res.writeHead(200, {
                         "Content-Type": "application/json"
                     });
                     
                     res.end(JSON.stringify({
-                        user: user
+                        existing: existing
                     }))
                 } else {
                     res.writeHead(404, {
@@ -39,7 +39,7 @@ const server = http.createServer((req, res) => {
                     });
                     
                     res.end(JSON.stringify({
-                        message: `Not found user ${id}`
+                        message: `Not found existing ${id}`
                     }))
                 }
             } else if (!Number.isInteger(id) || id <= 0) {
@@ -64,7 +64,7 @@ const server = http.createServer((req, res) => {
                 "Content-Type": "application/json"
             });
             res.end(JSON.stringify(
-                { "name": "User Management API", "version": "1.0.0" }
+                { "name": "existing Management API", "version": "1.0.0" }
             ))
         } else if (parts[1] === "") {
             res.writeHead(200, {
@@ -122,7 +122,7 @@ const server = http.createServer((req, res) => {
                         "Content-Type": "application/json"
                     })
                     res.end(JSON.stringify({
-                        message: "Cant create user"
+                        message: "Cant create existing"
                     }))
                 }
             })
@@ -137,9 +137,9 @@ const server = http.createServer((req, res) => {
             if (Number.isInteger(id) && id > 0) {
                 let body = "";
 
-                const user = users.find(user => user.id === id);
+                const existing = users.find(existing => existing.id === id);
 
-                if (user) {
+                if (existing) {
                     req.on("data", (chunk) => {
                         body += chunk;
                     }) 
@@ -151,7 +151,7 @@ const server = http.createServer((req, res) => {
                             typeof data.name === "string"
                         
                         if (validator) {
-                            user.name = data.name
+                            existing.name = data.name
 
                             res.writeHead(200, {
                                 "Content-Type": "application/json"
@@ -174,7 +174,46 @@ const server = http.createServer((req, res) => {
                     })
 
                     res.end(JSON.stringify({
-                        message: `Not found user ${id}`
+                        message: `Not found existing ${id}`
+                    }))
+                }
+            }
+        }
+    }
+
+    // DELETE METHOD
+    if (req.method === "DELETE") {
+        if (parts[1] === "users") {
+            const id = Number(parts[2])
+
+            if (!Number.isInteger(id)) {
+                res.writeHead(400, {
+                    "Content-Type": "application/json"
+                });
+            
+                res.end(JSON.stringify({
+                    message: "ID must be an integer!"
+                }))
+            } else {
+                const index = users.findIndex(user => user.id === id);
+                if (index !== -1) {
+                    users.splice(index, 1);
+    
+                    res.writeHead(200, {
+                        "Content-Type": "application/json"
+                    });
+                
+                    res.end(JSON.stringify({
+                        message: "Deleted!"
+                    }))
+                } else {
+                    res.writeHead(404, {
+                        "Content-Type": "application/json"
+                    });
+                
+                    res.end(JSON.stringify({
+                        message:
+                            `Not found user ${id}`
                     }))
                 }
             }
