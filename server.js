@@ -128,6 +128,58 @@ const server = http.createServer((req, res) => {
             })
         }
     }
+
+    // PUT METHOD
+    if (req.method === "PUT") {
+        if (parts[1] === "users") {
+            const id = Number(parts[2]);
+
+            if (Number.isInteger(id) && id > 0) {
+                let body = "";
+
+                const user = users.find(user => user.id === id);
+
+                if (user) {
+                    req.on("data", (chunk) => {
+                        body += chunk;
+                    }) 
+
+                    req.on("end", () => {
+                        const data = JSON.parse(body);
+                        
+                        const validator = 
+                            typeof data.name === "string"
+                        
+                        if (validator) {
+                            user.name = data.name
+
+                            res.writeHead(200, {
+                                "Content-Type": "application/json"
+                            })
+                            res.end(JSON.stringify({
+                                message: "Updated!"
+                            })) 
+                        } else {
+                            res.writeHead(400, {
+                                "Content-Type": "application/json"
+                            })
+                            res.end(JSON.stringify({
+                                message: "Name must be a string!"
+                            })) 
+                        }
+                    })
+                } else {
+                    res.writeHead(404, {
+                        "Content-Type": "application/json"
+                    })
+
+                    res.end(JSON.stringify({
+                        message: `Not found user ${id}`
+                    }))
+                }
+            }
+        }
+    }
 })
 
 server.listen(PORT, () => {
